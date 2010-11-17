@@ -65,11 +65,6 @@
  '(tool-bar ((((type x w32 mac) (class color)) (:background "grey" :foreground "black" :box (:line-width 1 :style released-button)))))
  '(trailing-whitespace ((nil (:foreground "red" :underline t)))))
 
-(setq load-path (cons "~/Desktop/Workspace/Dev/Liberty/work" load-path))
-(add-to-list 'auto-mode-alist '("\\.e\\'" . eiffel-mode))
-(add-to-list 'auto-mode-alist '("\\.se\\'" . eiffel-mode))
-(autoload 'eiffel-mode "eiffel" "Major mode for Eiffel programs" t)
-
 (defun tabs-eiffel-mode-hook ()
  (message " Loading tabs-eiffel-mode-hook...")
  (setq indent-tabs-mode t))
@@ -100,7 +95,13 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-(defun liberty ()
-  (interactive)
-  (dired "~/Desktop/Workspace/Dev/Liberty/src")
-  )
+
+(let ((curproj (getenv "CURRENT_PROJECT")))
+  (let ((project-file
+	 (expand-file-name (if curproj
+			       (concat "~/.projects/" curproj "/project.el")
+			     "~/.projects/.@current/project.el"))))
+    (message (concat "Project file: " project-file))
+    (if (file-exists-p project-file)
+	(load project-file)
+      (message (concat "Unknown project file: " project-file)))))
