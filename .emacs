@@ -20,6 +20,7 @@
  '(global-font-lock-mode t nil (font-lock))
  '(global-hl-line-mode t)
  '(idle-update-delay 0.25)
+ '(indent-tabs-mode nil)
  '(indicate-empty-lines t)
  '(lpr-printer-switch "-d")
  '(mouse-wheel-mode t nil (mwheel))
@@ -44,8 +45,6 @@
  '(truncate-partial-width-windows nil)
  '(use-dialog-box nil)
  '(use-file-dialog nil)
- '(whitespace-auto-cleanup t)
- '(whitespace-modes (quote (ada-mode asm-mode autoconf-mode awk-mode c-mode c++-mode cc-mode change-log-mode cperl-mode electric-nroff-mode emacs-lisp-mode f90-mode fortran-mode html-mode html3-mode java-mode jde-mode ksh-mode latex-mode LaTeX-mode lisp-mode m4-mode makefile-mode modula-2-mode nroff-mode objc-mode pascal-mode perl-mode prolog-mode python-mode scheme-mode sgml-mode sh-mode shell-script-mode simula-mode tcl-mode tex-mode texinfo-mode vrml-mode xml-mode eiffel-mode)))
  '(x-stretch-cursor t))
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -86,7 +85,7 @@
 ;; Put autosave files (ie #foo#) in one place, *not*
 ;; scattered all over the file system!
 (defvar autosave-dir
- (expand-file-name "~/.emacs.d/autosave"))
+  (expand-file-name "~/.emacs.d/autosave"))
 
 (make-directory autosave-dir t)
 
@@ -95,16 +94,16 @@
 
 (defun make-auto-save-file-name ()
   (concat autosave-dir
-   (if buffer-file-name
-      (concat "#" (file-name-nondirectory buffer-file-name) "#")
-    (expand-file-name
-     (concat "#%" (buffer-name) "#")))))
+          (if buffer-file-name
+              (concat "#" (file-name-nondirectory buffer-file-name) "#")
+            (expand-file-name
+             (concat "#%" (buffer-name) "#")))))
 
 ;; Put backup files (ie foo~) in one place too. (The backup-directory-alist
 ;; list contains regexp=>directory mappings; filenames matching a regexp are
 ;; backed up in the corresponding directory. Emacs will mkdir it if necessary.)
 (defvar backup-dir
- (expand-file-name "~/.emacs.d/backup"))
+  (expand-file-name "~/.emacs.d/backup"))
 
 (make-directory backup-dir t)
 
@@ -130,12 +129,12 @@
 
 (let ((curproj (getenv "CURRENT_PROJECT")))
   (let ((project-file
-	 (expand-file-name (if curproj
-			       (concat "~/.projects/" curproj "/project.el")
-			     "~/.projects/.@current/project.el"))))
+         (expand-file-name (if curproj
+                               (concat "~/.projects/" curproj "/project.el")
+                             "~/.projects/.@current/project.el"))))
     (message (concat "Project file: " project-file))
     (if (file-exists-p project-file)
-	(load project-file)
+        (load project-file)
       (message (concat "Unknown project file: " project-file)))))
 
 ;; Clipboard
@@ -144,13 +143,13 @@
 (defun get-clipboard-contents-as-string (type)
   "Return the value of the clipboard contents as a string."
   (let ((data-types '(TEXT
-		      STRING
-		      FILE_NAME))
-	text)
+                      STRING
+                      FILE_NAME))
+        text)
     (while (and (null text) data-types)
       (setq text (condition-case nil
-		     (x-get-selection type (car data-types))
-		   (error nil)))
+                     (x-get-selection type (car data-types))
+                   (error nil)))
       (setq data-types (cdr data-types)))
     text))
 
@@ -159,33 +158,33 @@
   (interactive)
   (let ((selection (get-clipboard-contents-as-string 'PRIMARY)))
     (if (string-match "/.*:[0-9]+:.*$" selection)
-	(let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
-	      (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
-	  (if (file-readable-p file)
-	      (progn
-		(find-file file)
-		(goto-line (string-to-number line)))
-	    (error (concat "Unknown file " file))))
+        (let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
+              (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
+          (if (file-readable-p file)
+              (progn
+                (find-file file)
+                (goto-line (string-to-number line)))
+            (error (concat "Unknown file " file))))
       (if (string-match "/.*:\\[[0-9]+,[0-9]+\\].*$" selection)
-	  (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
-		(line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
-		(col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
-	    (if (file-readable-p file)
-		(progn
-		  (find-file file)
-		  (goto-line (string-to-number line))
-		  (beginning-of-line)
-		  (forward-char (string-to-number col)))
-	      (error (concat "Unknown file " file))))
-	(error "Bad string in clipboard, ignoring")))))
+          (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
+                (line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
+                (col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
+            (if (file-readable-p file)
+                (progn
+                  (find-file file)
+                  (goto-line (string-to-number line))
+                  (beginning-of-line)
+                  (forward-char (string-to-number col)))
+              (error (concat "Unknown file " file))))
+        (error "Bad string in clipboard, ignoring")))))
 
 (global-set-key "\C-x\C-y" 'open-file-from-clipboard)
 
 ;; FIXMEs and other TODOs
-(require 'fic-mode)
-(add-hook 'c++-mode-hook 'turn-on-fic-mode)
-(add-hook 'emacs-lisp-mode-hook 'turn-on-fic-mode)
-(add-hook 'python-mode-hook 'turn-on-fic-mode)
+;(require 'fic-mode)
+;(add-hook 'c++-mode-hook 'turn-on-fic-mode)
+;(add-hook 'emacs-lisp-mode-hook 'turn-on-fic-mode)
+;(add-hook 'python-mode-hook 'turn-on-fic-mode)
 
 ;; Printing
 (defun do-print-buffer()
@@ -206,9 +205,8 @@
     (interactive)
     (let ((case-fold-search isearch-case-fold-search))
       (occur (if isearch-regexp isearch-string
-	       (regexp-quote isearch-string))))))
+               (regexp-quote isearch-string))))))
 
-(setq indent-tabs-mode nil)
 (menu-bar-mode t)
 (scroll-bar-mode nil)
 (setq inhibit-startup-message t)
@@ -219,12 +217,20 @@
   (interactive)
   (let ((curproj (getenv "CURRENT_PROJECT")))
     (let ((project-file
-	   (expand-file-name (if curproj
-				 (concat "~/.projects/" curproj "/project.el")
-			       "~/.projects/.@current/project.el"))))
+           (expand-file-name (if curproj
+                                 (concat "~/.projects/" curproj "/project.el")
+                               "~/.projects/.@current/project.el"))))
       (message (concat "Project file: " project-file))
       (if (file-exists-p project-file)
-	  (load project-file)
-	(message (concat "Unknown project file: " project-file))))))
+          (load project-file)
+        (message (concat "Unknown project file: " project-file))))))
 
-(global-set-key "\C-cp" 'goto-my-project)
+(global-set-key "\M-gp" 'goto-my-project)
+
+;; ----------------------------------------------------------------------
+;; ZENBURN
+;; This theme is great, just be sure to comment out the underlined highlight
+;; (also needs color-theme)
+;; http://www.emacswiki.org/emacs/download/zenburn.el
+(require 'zenburn)
+(zenburn)
