@@ -207,7 +207,7 @@
       (occur (if isearch-regexp isearch-string
                (regexp-quote isearch-string))))))
 
-(menu-bar-mode t)
+(menu-bar-mode nil)
 (scroll-bar-mode nil)
 (setq inhibit-startup-message t)
 
@@ -228,9 +228,35 @@
 (global-set-key "\M-gp" 'goto-my-project)
 
 ;; ----------------------------------------------------------------------
+;; Tags extensions
+(global-set-key "\M-?" 'tags-search)
+;(global-set-key "\M-?" 'tags-query-replace)
+
+;; ----------------------------------------------------------------------
+;; More key settings
+(global-set-key "\M-gt" 'auto-revert-tail-mode)
+
+;; ----------------------------------------------------------------------
+;; Make scripts executable
+;; thanks to http://www.masteringemacs.org/articles/2011/01/19/script-files-executable-automatically/
+
+(add-hook 'after-save-hook
+  'executable-make-buffer-file-executable-if-script-p)
+
+;; ----------------------------------------------------------------------
 ;; ZENBURN
 ;; This theme is great, just be sure to comment out the underlined highlight
 ;; (also needs color-theme)
 ;; http://www.emacswiki.org/emacs/download/zenburn.el
 (require 'zenburn)
 (zenburn)
+
+;; ----------------------------------------------------------------------
+;; Default C styles
+(setq c-default-style
+      '(
+        (java-mode . "java")
+        (awk-mode . "awk")
+        (c-mode . "k&r")
+        (cpp-mode . "ellemtel")
+        (other . "gnu")))
