@@ -35,6 +35,7 @@
  '(ps-spool-tumble t)
  '(ps-zebra-stripe-height 1)
  '(ps-zebra-stripes t)
+ '(python-indent 8)
  '(require-final-newline t)
  '(save-place t nil (saveplace))
  '(scalable-fonts-allowed t)
@@ -45,6 +46,7 @@
  '(truncate-partial-width-windows nil)
  '(use-dialog-box nil)
  '(use-file-dialog nil)
+ '(whitespace-style (quote (face tabs spaces trailing lines space-before-tab newline indentation empty space-after-tab space-mark tab-mark newline-mark)))
  '(x-stretch-cursor t))
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -126,17 +128,6 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-
-(let ((curproj (getenv "CURRENT_PROJECT")))
-  (let ((project-file
-         (expand-file-name (if curproj
-                               (concat "~/.projects/" curproj "/project.el")
-                             "~/.projects/.@current/project.el"))))
-    (message (concat "Project file: " project-file))
-    (if (file-exists-p project-file)
-        (load project-file)
-      (message (concat "Unknown project file: " project-file)))))
-
 ;; Clipboard
 
 ;http://www.emacswiki.org/emacs/CopyAndPaste
@@ -163,7 +154,7 @@
           (if (file-readable-p file)
               (progn
                 (find-file file)
-                (goto-line (string-to-number line)))
+                (goto-char (point-min)) (forward-line (1- (string-to-number line))))
             (error (concat "Unknown file " file))))
       (if (string-match "/.*:\\[[0-9]+,[0-9]+\\].*$" selection)
           (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
@@ -172,7 +163,7 @@
             (if (file-readable-p file)
                 (progn
                   (find-file file)
-                  (goto-line (string-to-number line))
+                  (goto-char (point-min)) (forward-line (1- (string-to-number line)))
                   (beginning-of-line)
                   (forward-char (string-to-number col)))
               (error (concat "Unknown file " file))))
@@ -211,22 +202,6 @@
 (scroll-bar-mode nil)
 (setq inhibit-startup-message t)
 
-;; Project management
-(defun goto-my-project ()
-  "Go to the latest project"
-  (interactive)
-  (let ((curproj (getenv "CURRENT_PROJECT")))
-    (let ((project-file
-           (expand-file-name (if curproj
-                                 (concat "~/.projects/" curproj "/project.el")
-                               "~/.projects/.@current/project.el"))))
-      (message (concat "Project file: " project-file))
-      (if (file-exists-p project-file)
-          (load project-file)
-        (message (concat "Unknown project file: " project-file))))))
-
-(global-set-key "\M-gp" 'goto-my-project)
-
 ;; ----------------------------------------------------------------------
 ;; Tags extensions
 (global-set-key "\M-?" 'tags-search)
@@ -253,10 +228,52 @@
 
 ;; ----------------------------------------------------------------------
 ;; Default C styles
-(setq c-default-style
-      '(
-        (java-mode . "java")
-        (awk-mode . "awk")
-        (c-mode . "k&r")
-        (cpp-mode . "ellemtel")
-        (other . "gnu")))
+(setq c-default-style '((java-mode . "java")
+                        (awk-mode . "awk")
+                        (c-mode . "k&r")
+                        (other . "linux")))
+
+;;; ----------------------------------------------------------------------
+;;; Tabs for python and makefiles
+
+(defun my-tabs-python-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'python-mode-hook 'my-tabs-python-hook)
+
+(defun my-tabs-makefile-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'makefile-mode-hook 'my-tabs-makefile-hook)
+
+;;; ----------------------------------------------------------------------
+;; auto compile elisp files after save
+(add-hook 'emacs-lisp-mode-hook (lambda () (add-hook 'after-save-hook 'emacs-lisp-byte-compile t t)) )
+
+
+;;; ----------------------------------------------------------------------
+;; make buffer names easily identifiable
+(require 'uniquify) ; bundled with GNU Emacs 23.2.1 or earlier
+(setq uniquify-buffer-name-style 'forward)
+
+
+;; ----------------------------------------------------------------------
+
+
+(defun go-to-my-project ()
+  (let ((curproj (getenv "CURRENT_PROJECT")))
+    (let ((project-file
+           (expand-file-name (if curproj
+                                 (concat "~/.projects/" curproj "/project.el")
+                               "~/.projects/.@current/project.el"))))
+      (message (concat "Project file: " project-file))
+      (if (file-exists-p project-file)
+          (load project-file)
+        (message (concat "Unknown project file: " project-file))))))
+
+;; Project management
+(defun goto-my-project ()
+  "Go to the latest project"
+  (interactive)
+  (go-to-my-project))
+
+(global-set-key "\M-gp" 'goto-my-project)
+(go-to-my-project)
