@@ -94,10 +94,10 @@
 
 (defun make-auto-save-file-name ()
   (concat autosave-dir
-          (if buffer-file-name
-              (concat "#" (file-name-nondirectory buffer-file-name) "#")
-            (expand-file-name
-             (concat "#%" (buffer-name) "#")))))
+	  (if buffer-file-name
+	      (concat "#" (file-name-nondirectory buffer-file-name) "#")
+	    (expand-file-name
+	     (concat "#%" (buffer-name) "#")))))
 
 ;; Put backup files (ie foo~) in one place too. (The backup-directory-alist
 ;; list contains regexp=>directory mappings; filenames matching a regexp are
@@ -121,7 +121,10 @@
 ; )
 
 ;; Nuke whitespaces when writing to a file
-(add-hook 'before-save-hook 'whitespace-cleanup)
+(defun tabclean ()
+  (whitespace-cleanup)
+  (untabify (buffer-end -1) (buffer-end 1)))
+(add-hook 'before-save-hook 'tabclean)
 
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -129,12 +132,12 @@
 
 (let ((curproj (getenv "CURRENT_PROJECT")))
   (let ((project-file
-         (expand-file-name (if curproj
-                               (concat "~/.projects/" curproj "/project.el")
-                             "~/.projects/.@current/project.el"))))
+	 (expand-file-name (if curproj
+			       (concat "~/.projects/" curproj "/project.el")
+			     "~/.projects/.@current/project.el"))))
     (message (concat "Project file: " project-file))
     (if (file-exists-p project-file)
-        (load project-file)
+	(load project-file)
       (message (concat "Unknown project file: " project-file)))))
 
 ;; Clipboard
@@ -143,13 +146,13 @@
 (defun get-clipboard-contents-as-string (type)
   "Return the value of the clipboard contents as a string."
   (let ((data-types '(TEXT
-                      STRING
-                      FILE_NAME))
-        text)
+		      STRING
+		      FILE_NAME))
+	text)
     (while (and (null text) data-types)
       (setq text (condition-case nil
-                     (x-get-selection type (car data-types))
-                   (error nil)))
+		     (x-get-selection type (car data-types))
+		   (error nil)))
       (setq data-types (cdr data-types)))
     text))
 
@@ -158,25 +161,25 @@
   (interactive)
   (let ((selection (get-clipboard-contents-as-string 'PRIMARY)))
     (if (string-match "/.*:[0-9]+:.*$" selection)
-        (let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
-              (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
-          (if (file-readable-p file)
-              (progn
-                (find-file file)
-                (goto-line (string-to-number line)))
-            (error (concat "Unknown file " file))))
+	(let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
+	      (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
+	  (if (file-readable-p file)
+	      (progn
+		(find-file file)
+		(goto-line (string-to-number line)))
+	    (error (concat "Unknown file " file))))
       (if (string-match "/.*:\\[[0-9]+,[0-9]+\\].*$" selection)
-          (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
-                (line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
-                (col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
-            (if (file-readable-p file)
-                (progn
-                  (find-file file)
-                  (goto-line (string-to-number line))
-                  (beginning-of-line)
-                  (forward-char (string-to-number col)))
-              (error (concat "Unknown file " file))))
-        (error "Bad string in clipboard, ignoring")))))
+	  (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
+		(line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
+		(col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
+	    (if (file-readable-p file)
+		(progn
+		  (find-file file)
+		  (goto-line (string-to-number line))
+		  (beginning-of-line)
+		  (forward-char (string-to-number col)))
+	      (error (concat "Unknown file " file))))
+	(error "Bad string in clipboard, ignoring")))))
 
 (global-set-key "\C-x\C-y" 'open-file-from-clipboard)
 
@@ -205,9 +208,9 @@
     (interactive)
     (let ((case-fold-search isearch-case-fold-search))
       (occur (if isearch-regexp isearch-string
-               (regexp-quote isearch-string))))))
+	       (regexp-quote isearch-string))))))
 
-(menu-bar-mode t)
+(menu-bar-mode nil)
 (scroll-bar-mode nil)
 (setq inhibit-startup-message t)
 
@@ -217,13 +220,13 @@
   (interactive)
   (let ((curproj (getenv "CURRENT_PROJECT")))
     (let ((project-file
-           (expand-file-name (if curproj
-                                 (concat "~/.projects/" curproj "/project.el")
-                               "~/.projects/.@current/project.el"))))
+	   (expand-file-name (if curproj
+				 (concat "~/.projects/" curproj "/project.el")
+			       "~/.projects/.@current/project.el"))))
       (message (concat "Project file: " project-file))
       (if (file-exists-p project-file)
-          (load project-file)
-        (message (concat "Unknown project file: " project-file))))))
+	  (load project-file)
+	(message (concat "Unknown project file: " project-file))))))
 
 (global-set-key "\M-gp" 'goto-my-project)
 
@@ -234,3 +237,9 @@
 ;; http://www.emacswiki.org/emacs/download/zenburn.el
 (require 'zenburn)
 (zenburn)
+
+;; ----------------------------------------------------------------------
+;; Markdown
+
+(autoload 'markdown-mode "markdown-mode" "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
