@@ -35,6 +35,7 @@
  '(ps-spool-tumble t)
  '(ps-zebra-stripe-height 1)
  '(ps-zebra-stripes t)
+ '(python-indent 8)
  '(require-final-newline t)
  '(save-place t nil (saveplace))
  '(scalable-fonts-allowed t)
@@ -45,6 +46,7 @@
  '(truncate-partial-width-windows nil)
  '(use-dialog-box nil)
  '(use-file-dialog nil)
+ '(whitespace-style (quote (face tabs spaces trailing lines space-before-tab newline indentation empty space-after-tab space-mark tab-mark newline-mark)))
  '(x-stretch-cursor t))
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -94,10 +96,10 @@
 
 (defun make-auto-save-file-name ()
   (concat autosave-dir
-	  (if buffer-file-name
-	      (concat "#" (file-name-nondirectory buffer-file-name) "#")
-	    (expand-file-name
-	     (concat "#%" (buffer-name) "#")))))
+          (if buffer-file-name
+              (concat "#" (file-name-nondirectory buffer-file-name) "#")
+            (expand-file-name
+             (concat "#%" (buffer-name) "#")))))
 
 ;; Put backup files (ie foo~) in one place too. (The backup-directory-alist
 ;; list contains regexp=>directory mappings; filenames matching a regexp are
@@ -129,30 +131,19 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-
-(let ((curproj (getenv "CURRENT_PROJECT")))
-  (let ((project-file
-	 (expand-file-name (if curproj
-			       (concat "~/.projects/" curproj "/project.el")
-			     "~/.projects/.@current/project.el"))))
-    (message (concat "Project file: " project-file))
-    (if (file-exists-p project-file)
-	(load project-file)
-      (message (concat "Unknown project file: " project-file)))))
-
 ;; Clipboard
 
 ;http://www.emacswiki.org/emacs/CopyAndPaste
 (defun get-clipboard-contents-as-string (type)
   "Return the value of the clipboard contents as a string."
   (let ((data-types '(TEXT
-		      STRING
-		      FILE_NAME))
-	text)
+                      STRING
+                      FILE_NAME))
+        text)
     (while (and (null text) data-types)
       (setq text (condition-case nil
-		     (x-get-selection type (car data-types))
-		   (error nil)))
+                     (x-get-selection type (car data-types))
+                   (error nil)))
       (setq data-types (cdr data-types)))
     text))
 
@@ -161,25 +152,25 @@
   (interactive)
   (let ((selection (get-clipboard-contents-as-string 'PRIMARY)))
     (if (string-match "/.*:[0-9]+:.*$" selection)
-	(let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
-	      (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
-	  (if (file-readable-p file)
-	      (progn
-		(find-file file)
-		(goto-line (string-to-number line)))
-	    (error (concat "Unknown file " file))))
+        (let ((file (replace-regexp-in-string "\\(/.*\\):[0-9]+:.*$" "\\1" selection))
+              (line (replace-regexp-in-string "/.*:\\([0-9]+\\):.*$" "\\1" selection)))
+          (if (file-readable-p file)
+              (progn
+                (find-file file)
+                (goto-line (string-to-number line)))
+            (error (concat "Unknown file " file))))
       (if (string-match "/.*:\\[[0-9]+,[0-9]+\\].*$" selection)
-	  (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
-		(line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
-		(col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
-	    (if (file-readable-p file)
-		(progn
-		  (find-file file)
-		  (goto-line (string-to-number line))
-		  (beginning-of-line)
-		  (forward-char (string-to-number col)))
-	      (error (concat "Unknown file " file))))
-	(error "Bad string in clipboard, ignoring")))))
+          (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
+                (line (replace-regexp-in-string "/.*:\\[\\([0-9]+\\),[0-9]+\\].*$" "\\1" selection))
+                (col  (replace-regexp-in-string "/.*:\\[[0-9]+,\\([0-9]+\\)\\].*$" "\\1" selection)))
+            (if (file-readable-p file)
+                (progn
+                  (find-file file)
+                  (goto-line (string-to-number line))
+                  (beginning-of-line)
+                  (forward-char (string-to-number col)))
+              (error (concat "Unknown file " file))))
+        (error "Bad string in clipboard, ignoring")))))
 
 (global-set-key "\C-x\C-y" 'open-file-from-clipboard)
 
@@ -208,27 +199,63 @@
     (interactive)
     (let ((case-fold-search isearch-case-fold-search))
       (occur (if isearch-regexp isearch-string
-	       (regexp-quote isearch-string))))))
+               (regexp-quote isearch-string))))))
 
 (menu-bar-mode nil)
 (scroll-bar-mode nil)
 (setq inhibit-startup-message t)
 
-;; Project management
-(defun goto-my-project ()
-  "Go to the latest project"
-  (interactive)
-  (let ((curproj (getenv "CURRENT_PROJECT")))
-    (let ((project-file
-	   (expand-file-name (if curproj
-				 (concat "~/.projects/" curproj "/project.el")
-			       "~/.projects/.@current/project.el"))))
-      (message (concat "Project file: " project-file))
-      (if (file-exists-p project-file)
-	  (load project-file)
-	(message (concat "Unknown project file: " project-file))))))
+;; ----------------------------------------------------------------------
+;; Tags extensions
+(global-set-key "\M-?" 'tags-search)
+;(global-set-key "\M-?" 'tags-query-replace)
 
-(global-set-key "\M-gp" 'goto-my-project)
+;; ----------------------------------------------------------------------
+;; More key settings
+(global-set-key "\M-gt" 'auto-revert-tail-mode)
+
+;; ----------------------------------------------------------------------
+;; Make scripts executable
+;; thanks to http://www.masteringemacs.org/articles/2011/01/19/script-files-executable-automatically/
+
+(add-hook 'after-save-hook
+  'executable-make-buffer-file-executable-if-script-p)
+
+;; ----------------------------------------------------------------------
+;; ZENBURN
+;; This theme is great, just be sure to comment out the underlined highlight
+;; (also needs color-theme)
+;; http://www.emacswiki.org/emacs/download/zenburn.el
+(require 'zenburn)
+(zenburn)
+
+;; ----------------------------------------------------------------------
+;; Default C styles
+(setq c-default-style '((java-mode . "java")
+                        (awk-mode . "awk")
+                        (c-mode . "k&r")
+                        (other . "linux")))
+
+;;; ----------------------------------------------------------------------
+;;; Tabs for python and makefiles
+
+(defun my-tabs-python-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'python-mode-hook 'my-tabs-python-hook)
+
+(defun my-tabs-makefile-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'makefile-mode-hook 'my-tabs-makefile-hook)
+
+;;; ----------------------------------------------------------------------
+;; auto compile elisp files after save
+(add-hook 'emacs-lisp-mode-hook (lambda () (add-hook 'after-save-hook 'emacs-lisp-byte-compile t t)) )
+
+
+;;; ----------------------------------------------------------------------
+;; make buffer names easily identifiable
+(require 'uniquify) ; bundled with GNU Emacs 23.2.1 or earlier
+(setq uniquify-buffer-name-style 'forward)
 
 ;; ----------------------------------------------------------------------
 ;; ZENBURN
@@ -243,3 +270,27 @@
 
 (autoload 'markdown-mode "markdown-mode" "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+
+;; ----------------------------------------------------------------------
+
+
+(defun go-to-my-project ()
+  (let ((curproj (getenv "CURRENT_PROJECT")))
+    (let ((project-file
+           (expand-file-name (if curproj
+                                 (concat "~/.projects/" curproj "/project.el")
+                               "~/.projects/.@current/project.el"))))
+      (message (concat "Project file: " project-file))
+      (if (file-exists-p project-file)
+          (load project-file)
+        (message (concat "Unknown project file: " project-file))))))
+
+;; Project management
+(defun goto-my-project ()
+  "Go to the latest project"
+  (interactive)
+  (go-to-my-project))
+
+(global-set-key "\M-gp" 'goto-my-project)
+(go-to-my-project)
