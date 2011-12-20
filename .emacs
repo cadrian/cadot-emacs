@@ -215,6 +215,22 @@
 (global-set-key "\M-gt" 'auto-revert-tail-mode)
 
 ;; ----------------------------------------------------------------------
+;; Moving between windows
+
+(defun goto-next-window()
+  "Go to the next window"
+  (interactive)
+  (other-window 1))
+
+(defun goto-previous-window()
+  "Go to the next window"
+  (interactive)
+  (other-window -1))
+
+(global-set-key [C-tab] 'goto-next-window)
+(global-set-key [C-S-iso-lefttab] 'goto-previous-window)
+
+;; ----------------------------------------------------------------------
 ;; Make scripts executable
 ;; thanks to http://www.masteringemacs.org/articles/2011/01/19/script-files-executable-automatically/
 
