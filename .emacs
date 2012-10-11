@@ -1,15 +1,18 @@
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(auto-compression-mode t nil (jka-compr))
  '(blink-cursor-mode nil)
+ '(c-basic-offset 3)
  '(case-fold-search t)
  '(column-number-mode t)
  '(confirm-kill-emacs (quote y-or-n-p))
  '(current-language-environment "UTF-8")
  '(cursor-in-non-selected-windows t)
+ '(custom-enabled-themes (quote (zenburn)))
+ '(custom-safe-themes (quote ("78b1c94c1298bbe80ae7f49286e720be25665dca4b89aea16c60dacccfbb0bca" default)))
  '(default-input-method "rfc1345")
  '(dired-dwim-target t)
  '(dired-guess-shell-gnutar "/usr/bin/tar")
@@ -46,22 +49,26 @@
  '(truncate-partial-width-windows nil)
  '(use-dialog-box nil)
  '(use-file-dialog nil)
- '(whitespace-style (quote (face tabs spaces trailing lines space-before-tab newline indentation empty space-after-tab space-mark tab-mark newline-mark)))
  '(x-stretch-cursor t))
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
- '(default ((t (:stipple nil :background "snow" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 100 :width normal :foundry "unknown" :family "Inconsolata"))))
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "Inconsolata"))))
  '(border ((t (:background "black"))))
  '(cursor ((t (:background "red"))))
  '(font-lock-constant-face ((((class color) (min-colors 88) (background light)) (:foreground "DarkSlateBlue"))))
  '(font-lock-string-face ((((class color) (min-colors 88) (background light)) (:foreground "Brown"))))
  '(font-lock-variable-name-face ((((class color) (min-colors 88) (background light)) (:foreground "#807020"))))
- '(hl-line ((t (:inherit highlight :background "#ffff88"))))
- '(mmm-code-submode-face ((t (:background "Gray95"))))
- '(mode-line ((((type x w32 mac) (class color)) (:background "grey" :foreground "black" :box (:line-width -1 :style released-button)))))
+ '(hi-black-b ((t (:weight bold))) t)
+ '(hi-blue-b ((((min-colors 88)) (:foreground "cyan" :weight bold))) t)
+ '(hi-red-b ((((min-colors 88)) (:foreground "pink" :weight bold))) t)
+ '(hl-line ((t (:inherit highlight :background "#3f4f5f"))))
+ '(mmm-code-submode-face ((t (:background "Gray95"))) t)
+ '(mode-line ((t (:background "#3f3f3f" :foreground "black" :box (:line-width -1 :style released-button)))))
+ '(mode-line-buffer-id ((t (:foreground "#6fcff0" :weight bold))))
+ '(mode-line-inactive ((t (:inherit mode-line :background "#1f1f1f" :foreground "#5f7f5f" :box (:line-width -1 :style released-button) :weight light))))
  '(region ((((class color) (min-colors 88) (background dark)) (:background "yellow" :foreground "black"))))
  '(sh-heredoc ((((class color) (background light)) (:foreground "tan4"))))
  '(tool-bar ((((type x w32 mac) (class color)) (:background "grey" :foreground "black" :box (:line-width 1 :style released-button)))))
@@ -82,7 +89,11 @@
 (prefer-coding-system 'utf-8)
 
 ;; local scripts
-(setq load-path (cons "~/.emacs.d/site-lisp" load-path))
+(setq load-path (cons "~/.emacs.d/site-lisp/" load-path))
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+
+(if (file-exists-p "~/.emacs.d/local-init.el")
+    (load "~/.emacs.d/local-init.el"))
 
 ;; Put autosave files (ie #foo#) in one place, *not*
 ;; scattered all over the file system!
@@ -124,8 +135,13 @@
 
 ;; Nuke whitespaces when writing to a file
 (defun tabclean ()
-  (whitespace-cleanup)
-  (untabify (buffer-end -1) (buffer-end 1)))
+  (save-excursion
+    (whitespace-cleanup)
+    (if indent-tabs-mode
+        (tabify (buffer-end -1) (buffer-end 1))
+      (untabify (buffer-end -1) (buffer-end 1)))
+    (if (functionp 'at-save)
+        (at-save))))
 (add-hook 'before-save-hook 'tabclean)
 
 (put 'downcase-region 'disabled nil)
@@ -241,9 +257,8 @@
 ;; ZENBURN
 ;; This theme is great, just be sure to comment out the underlined highlight
 ;; (also needs color-theme)
-;; http://www.emacswiki.org/emacs/download/zenburn.el
-(require 'zenburn)
-(zenburn)
+;; https://github.com/bbatsov/zenburn-emacs
+(load-theme 'zenburn t)
 
 ;; ----------------------------------------------------------------------
 ;; Default C styles
@@ -252,16 +267,10 @@
                         (c-mode . "k&r")
                         (other . "linux")))
 
-;;; ----------------------------------------------------------------------
-;;; Tabs for python and makefiles
+(defun my-java-mode-hook ()
+  (setq c-basic-offset 4))
+(add-hook 'java-mode-hook 'my-java-mode-hook)
 
-(defun my-tabs-python-hook ()
-  (setq indent-tabs-mode t))
-(add-hook 'python-mode-hook 'my-tabs-python-hook)
-
-(defun my-tabs-makefile-hook ()
-  (setq indent-tabs-mode t))
-(add-hook 'makefile-mode-hook 'my-tabs-makefile-hook)
 
 ;;; ----------------------------------------------------------------------
 ;; auto compile elisp files after save
@@ -273,19 +282,51 @@
 (require 'uniquify) ; bundled with GNU Emacs 23.2.1 or earlier
 (setq uniquify-buffer-name-style 'forward)
 
-;; ----------------------------------------------------------------------
-;; ZENBURN
-;; This theme is great, just be sure to comment out the underlined highlight
-;; (also needs color-theme)
-;; http://www.emacswiki.org/emacs/download/zenburn.el
-(require 'zenburn)
-(zenburn)
 
 ;; ----------------------------------------------------------------------
 ;; Markdown
 
 (autoload 'markdown-mode "markdown-mode" "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+
+;; ----------------------------------------------------------------------
+;; Save buffers when emacs loses focus (does it ever happen?) :-)
+
+(defadvice handle-switch-frame (before save-some-buffers-advice activate)
+  "Save all file buffers if emacs looses focus."
+  (save-some-buffers t))
+
+
+;; ----------------------------------------------------------------------
+;; buffer switching
+
+(require 'ido)
+
+
+;; ----------------------------------------------------------------------
+;; http://emacswiki.org/emacs/ChangingEncodings
+
+(defun recode-region (start end &optional coding-system)
+      "Replace the region with a recoded text."
+      (interactive "r\n\zCoding System (utf-8): ")
+      (setq coding-system (or coding-system 'utf-8))
+      (let ((buffer-read-only nil)
+        (text (buffer-substring start end)))
+        (delete-region start end)
+        (insert (decode-coding-string (string-make-unibyte text) coding-system))))
+
+
+;;; ----------------------------------------------------------------------
+;;; Tabs for python and makefiles
+
+(defun my-tabs-python-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'python-mode-hook 'my-tabs-python-hook)
+
+(defun my-tabs-makefile-hook ()
+  (setq indent-tabs-mode t))
+(add-hook 'makefile-mode-hook 'my-tabs-makefile-hook)
 
 
 ;; ----------------------------------------------------------------------
