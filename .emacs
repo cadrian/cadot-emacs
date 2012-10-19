@@ -13,6 +13,8 @@
  '(cursor-in-non-selected-windows t)
  '(custom-enabled-themes (quote (zenburn)))
  '(custom-safe-themes (quote ("78b1c94c1298bbe80ae7f49286e720be25665dca4b89aea16c60dacccfbb0bca" default)))
+ '(debian-changelog-full-name "Cyril ADRIAN")
+ '(debian-changelog-mailing-address "cyril.adrian@gmail.com")
  '(default-input-method "rfc1345")
  '(dired-dwim-target t)
  '(dired-guess-shell-gnutar "/usr/bin/tar")
