@@ -69,7 +69,7 @@
  '(mode-line ((t (:background "#3f3f3f" :foreground "black" :box (:line-width -1 :style released-button)))))
  '(mode-line-buffer-id ((t (:foreground "#6fcff0" :weight bold))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#1f1f1f" :foreground "#5f7f5f" :box (:line-width -1 :style released-button) :weight light))))
- '(region ((((class color) (min-colors 88) (background dark)) (:background "yellow" :foreground "black"))))
+ '(region ((t (:background "#4f1f1f"))))
  '(sh-heredoc ((((class color) (background light)) (:foreground "tan4"))))
  '(tool-bar ((((type x w32 mac) (class color)) (:background "grey" :foreground "black" :box (:line-width 1 :style released-button)))))
  '(trailing-whitespace ((nil (:foreground "red" :underline t)))))
@@ -143,6 +143,15 @@
     (if (functionp 'at-save)
         (at-save))))
 (add-hook 'before-save-hook 'tabclean)
+
+; http://stackoverflow.com/questions/7349487/emacs-different-tab-indent-settings-in-different-modes/12958498#12958498
+(defadvice whitespace-cleanup (around whitespace-cleanup-indent-tab
+                                      activate)
+  "Fix whitespace-cleanup indent-tabs-mode bug"
+  (let ((whitespace-indent-tabs-mode indent-tabs-mode)
+        (whitespace-tab-width tab-width))
+    ad-do-it))
+
 
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
