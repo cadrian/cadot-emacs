@@ -3,6 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"])
  '(auto-compression-mode t nil (jka-compr))
  '(blink-cursor-mode nil)
  '(c-basic-offset 3)
@@ -12,7 +13,7 @@
  '(current-language-environment "UTF-8")
  '(cursor-in-non-selected-windows t)
  '(custom-enabled-themes (quote (zenburn)))
- '(custom-safe-themes (quote ("78b1c94c1298bbe80ae7f49286e720be25665dca4b89aea16c60dacccfbb0bca" default)))
+ '(custom-safe-themes (quote ("be7eadb2971d1057396c20e2eebaa08ec4bfd1efe9382c12917c6fe24352b7c1" "78b1c94c1298bbe80ae7f49286e720be25665dca4b89aea16c60dacccfbb0bca" default)))
  '(debian-changelog-full-name "Cyril ADRIAN")
  '(debian-changelog-mailing-address "cyril.adrian@gmail.com")
  '(default-input-method "rfc1345")
@@ -22,11 +23,17 @@
  '(display-time-24hr-format t)
  '(display-time-day-and-date t)
  '(display-time-mode t nil (time))
+ '(fci-rule-color "#383838")
+ '(flymake-log-level 2)
+ '(flymake-master-file-count-limit 32)
+ '(flymake-no-changes-timeout 0.2)
  '(global-font-lock-mode t nil (font-lock))
  '(global-hl-line-mode t)
  '(idle-update-delay 0.25)
  '(indent-tabs-mode nil)
  '(indicate-empty-lines t)
+ '(jit-lock-chunk-size 4096)
+ '(jit-lock-stealth-nice 0.25)
  '(lpr-printer-switch "-d")
  '(mouse-wheel-mode t nil (mwheel))
  '(ps-line-number t)
@@ -42,6 +49,7 @@
  '(ps-zebra-stripes t)
  '(python-indent 8)
  '(require-final-newline t)
+ '(safe-local-variable-values (quote ((sgml-local-ecat-files) (sgml-local-catalogs) (sgml-exposed-tags) (sgml-default-dtd-file) (sgml-parent-document) (sgml-indent-data . t) (sgml-indent-step . 2) (sgml-always-quote-attributes . t) (sgml-minimize-attributes) (sgml-shorttag . t) (sgml-omittag . t))))
  '(save-place t nil (saveplace))
  '(scalable-fonts-allowed t)
  '(show-paren-mode t nil (paren))
@@ -57,21 +65,16 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "Inconsolata"))))
+ '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 105 :width normal :foundry "unknown" :family "Inconsolata"))))
  '(border ((t (:background "black"))))
  '(cursor ((t (:background "red"))))
  '(font-lock-constant-face ((((class color) (min-colors 88) (background light)) (:foreground "DarkSlateBlue"))))
  '(font-lock-string-face ((((class color) (min-colors 88) (background light)) (:foreground "Brown"))))
  '(font-lock-variable-name-face ((((class color) (min-colors 88) (background light)) (:foreground "#807020"))))
- '(hi-black-b ((t (:weight bold))) t)
- '(hi-blue-b ((((min-colors 88)) (:foreground "cyan" :weight bold))) t)
- '(hi-red-b ((((min-colors 88)) (:foreground "pink" :weight bold))) t)
- '(hl-line ((t (:inherit highlight :background "#3f4f5f"))))
  '(mmm-code-submode-face ((t (:background "Gray95"))) t)
  '(mode-line ((t (:background "#3f3f3f" :foreground "black" :box (:line-width -1 :style released-button)))))
  '(mode-line-buffer-id ((t (:foreground "#6fcff0" :weight bold))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#1f1f1f" :foreground "#5f7f5f" :box (:line-width -1 :style released-button) :weight light))))
- '(region ((t (:background "#4f1f1f"))))
  '(sh-heredoc ((((class color) (background light)) (:foreground "tan4"))))
  '(tool-bar ((((type x w32 mac) (class color)) (:background "grey" :foreground "black" :box (:line-width 1 :style released-button)))))
  '(trailing-whitespace ((nil (:foreground "red" :underline t)))))
@@ -184,7 +187,8 @@
           (if (file-readable-p file)
               (progn
                 (find-file file)
-                (goto-line (string-to-number line)))
+                (goto-char (point-min))
+                (forward-line (1- (string-to-number line))))
             (error (concat "Unknown file " file))))
       (if (string-match "/.*:\\[[0-9]+,[0-9]+\\].*$" selection)
           (let ((file (replace-regexp-in-string "\\(/.*\\):\\[[0-9]+,[0-9]+\\].*$" "\\1" selection))
@@ -193,7 +197,8 @@
             (if (file-readable-p file)
                 (progn
                   (find-file file)
-                  (goto-line (string-to-number line))
+                  (goto-char (point-min))
+                  (forward-line (1- (string-to-number line)))
                   (beginning-of-line)
                   (forward-char (string-to-number col)))
               (error (concat "Unknown file " file))))
@@ -228,8 +233,8 @@
       (occur (if isearch-regexp isearch-string
                (regexp-quote isearch-string))))))
 
-(menu-bar-mode nil)
-(scroll-bar-mode nil)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
 (setq inhibit-startup-message t)
 
 ;; ----------------------------------------------------------------------
@@ -265,11 +270,52 @@
   'executable-make-buffer-file-executable-if-script-p)
 
 ;; ----------------------------------------------------------------------
-;; ZENBURN
+;; THEMES
+
+;; Zenburn
 ;; This theme is great, just be sure to comment out the underlined highlight
 ;; (also needs color-theme)
 ;; https://github.com/bbatsov/zenburn-emacs
-(load-theme 'zenburn t)
+(load-theme 'zenburn t t)
+(custom-theme-set-faces
+ 'zenburn
+ '(compilation-error-face ((t (:inherit error))) t)
+ '(compilation-warning-face ((t (:inherit warning))) t)
+ '(error ((t (:underline "red"))))
+ '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
+ '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
+ '(flyspell-duplicate ((t (:underline "yellow"))) t)
+ '(flyspell-incorrect ((t (:underline "red4"))) t)
+ '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
+ '(font-lock-warning-face ((t (:inherit warning))))
+ '(hi-black-b ((t (:weight bold))) t)
+ '(hi-blue-b ((((min-colors 88)) (:foreground "cyan" :weight bold))) t)
+ '(hi-red-b ((((min-colors 88)) (:foreground "pink" :weight bold))) t)
+ '(hl-line ((t (:inherit highlight :background "#3f4f5f"))))
+ '(region ((t (:inherit default :background "#4f1f1f"))))
+ '(warning ((t (:underline "DarkOrange")))))
+
+; Joost
+(load-theme 'joost t t)
+(custom-theme-set-faces
+ 'joost
+ '(compilation-error-face ((t (:inherit error))) t)
+ '(compilation-warning-face ((t (:inherit warning))) t)
+ '(error ((t (:underline "red"))))
+ '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
+ '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
+ '(flyspell-duplicate ((t (:underline "yellow"))) t)
+ '(flyspell-incorrect ((t (:underline "red4"))) t)
+ '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
+ '(font-lock-warning-face ((t (:inherit warning))))
+ '(hi-black-b ((t (:weight bold))) t)
+ '(hi-blue-b ((((min-colors 88)) (:foreground "blue" :weight bold))) t)
+ '(hi-red-b ((((min-colors 88)) (:foreground "red" :weight bold))) t)
+ '(hl-line ((t (:inherit highlight :background "#ddeeff"))))
+ '(region ((t (:inherit default :background "#ffeedd"))))
+ '(warning ((t (:underline "DarkOrange")))))
+
+(enable-theme 'zenburn)
 
 ;; ----------------------------------------------------------------------
 ;; Default C styles
@@ -338,6 +384,15 @@
 (defun my-tabs-makefile-hook ()
   (setq indent-tabs-mode t))
 (add-hook 'makefile-mode-hook 'my-tabs-makefile-hook)
+
+
+;; ----------------------------------------------------------------------
+;; org mode
+
+(global-set-key "\C-col" 'org-store-link)
+(global-set-key "\C-coc" 'org-capture)
+(global-set-key "\C-coa" 'org-agenda)
+(global-set-key "\C-cob" 'org-iswitchb)
 
 
 ;; ----------------------------------------------------------------------
