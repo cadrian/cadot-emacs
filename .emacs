@@ -1,19 +1,24 @@
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"])
+ '(ansi-color-names-vector
+   ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"])
  '(auto-compression-mode t nil (jka-compr))
  '(blink-cursor-mode nil)
  '(c-basic-offset 3)
  '(case-fold-search t)
  '(column-number-mode t)
- '(confirm-kill-emacs (quote y-or-n-p))
+ '(confirm-kill-emacs 'y-or-n-p)
  '(current-language-environment "UTF-8")
  '(cursor-in-non-selected-windows t)
- '(custom-enabled-themes (quote (zenburn)))
- '(custom-safe-themes (quote ("be7eadb2971d1057396c20e2eebaa08ec4bfd1efe9382c12917c6fe24352b7c1" "78b1c94c1298bbe80ae7f49286e720be25665dca4b89aea16c60dacccfbb0bca" default)))
  '(debian-changelog-full-name "Cyril ADRIAN")
  '(debian-changelog-mailing-address "cyril.adrian@gmail.com")
  '(default-input-method "rfc1345")
@@ -36,20 +41,33 @@
  '(jit-lock-stealth-nice 0.25)
  '(lpr-printer-switch "-d")
  '(mouse-wheel-mode t nil (mwheel))
+ '(org-adapt-indentation t)
+ '(org-startup-indented t)
  '(ps-line-number t)
  '(ps-line-number-start 10)
  '(ps-line-number-step 10)
  '(ps-n-up-printing 2)
- '(ps-paper-type (quote a4))
+ '(ps-paper-type 'a4)
  '(ps-printer-name-option "-d")
- '(ps-spool-config (quote setpagedevice))
+ '(ps-spool-config 'setpagedevice)
  '(ps-spool-duplex t)
  '(ps-spool-tumble t)
  '(ps-zebra-stripe-height 1)
  '(ps-zebra-stripes t)
  '(python-indent 8)
  '(require-final-newline t)
- '(safe-local-variable-values (quote ((sgml-local-ecat-files) (sgml-local-catalogs) (sgml-exposed-tags) (sgml-default-dtd-file) (sgml-parent-document) (sgml-indent-data . t) (sgml-indent-step . 2) (sgml-always-quote-attributes . t) (sgml-minimize-attributes) (sgml-shorttag . t) (sgml-omittag . t))))
+ '(safe-local-variable-values
+   '((sgml-local-ecat-files)
+     (sgml-local-catalogs)
+     (sgml-exposed-tags)
+     (sgml-default-dtd-file)
+     (sgml-parent-document)
+     (sgml-indent-data . t)
+     (sgml-indent-step . 2)
+     (sgml-always-quote-attributes . t)
+     (sgml-minimize-attributes)
+     (sgml-shorttag . t)
+     (sgml-omittag . t)))
  '(save-place t nil (saveplace))
  '(scalable-fonts-allowed t)
  '(show-paren-mode t nil (paren))
@@ -59,18 +77,20 @@
  '(truncate-partial-width-windows nil)
  '(use-dialog-box nil)
  '(use-file-dialog nil)
+ '(warning-suppress-types '((comp)))
  '(x-stretch-cursor t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 105 :width normal :foundry "unknown" :family "Inconsolata"))))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "#3f3f3f" :foreground "#dcdccc" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "CTDB" :family "Fira Code"))))
  '(border ((t (:background "black"))))
  '(cursor ((t (:background "red"))))
  '(font-lock-constant-face ((((class color) (min-colors 88) (background light)) (:foreground "DarkSlateBlue"))))
  '(font-lock-string-face ((((class color) (min-colors 88) (background light)) (:foreground "Brown"))))
  '(font-lock-variable-name-face ((((class color) (min-colors 88) (background light)) (:foreground "#807020"))))
+ '(highlight ((t (:background "#383838"))))
  '(mmm-code-submode-face ((t (:background "Gray95"))) t)
  '(mode-line ((t (:background "#3f3f3f" :foreground "black" :box (:line-width -1 :style released-button)))))
  '(mode-line-buffer-id ((t (:foreground "#6fcff0" :weight bold))))
@@ -240,6 +260,9 @@
 ;; ----------------------------------------------------------------------
 ;; Tags extensions
 (global-set-key "\M-?" 'tags-search)
+(global-set-key "\M-." 'find-tag)
+(global-set-key "\M-*" 'pop-tag-mark)
+(global-set-key "\M-," 'tags-loop-continue)
 ;(global-set-key "\M-?" 'tags-query-replace)
 
 ;; ----------------------------------------------------------------------
@@ -277,43 +300,43 @@
 ;; (also needs color-theme)
 ;; https://github.com/bbatsov/zenburn-emacs
 (load-theme 'zenburn t t)
-(custom-theme-set-faces
- 'zenburn
- '(compilation-error-face ((t (:inherit error))) t)
- '(compilation-warning-face ((t (:inherit warning))) t)
- '(error ((t (:underline "red"))))
- '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
- '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
- '(flyspell-duplicate ((t (:underline "yellow"))) t)
- '(flyspell-incorrect ((t (:underline "red4"))) t)
- '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
- '(font-lock-warning-face ((t (:inherit warning))))
- '(hi-black-b ((t (:weight bold))) t)
- '(hi-blue-b ((((min-colors 88)) (:foreground "cyan" :weight bold))) t)
- '(hi-red-b ((((min-colors 88)) (:foreground "pink" :weight bold))) t)
- '(hl-line ((t (:inherit highlight :background "#3f4f5f"))))
- '(region ((t (:inherit default :background "#4f1f1f"))))
- '(warning ((t (:underline "DarkOrange")))))
+;;** (custom-theme-set-faces
+;;**  'zenburn
+;;**  '(compilation-error-face ((t (:inherit error))) t)
+;;**  '(compilation-warning-face ((t (:inherit warning))) t)
+;;**  '(error ((t (:underline "red"))))
+;;**  '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
+;;**  '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
+;;**  '(flyspell-duplicate ((t (:underline "yellow"))) t)
+;;**  '(flyspell-incorrect ((t (:underline "red4"))) t)
+;;**  '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
+;;**  '(font-lock-warning-face ((t (:inherit warning))))
+;;**  '(hi-black-b ((t (:weight bold))) t)
+;;**  '(hi-blue-b ((((min-colors 88)) (:foreground "cyan" :weight bold))) t)
+;;**  '(hi-red-b ((((min-colors 88)) (:foreground "pink" :weight bold))) t)
+;;**  '(hl-line ((t (:inherit highlight :background "#3f4f5f"))))
+;;**  '(region ((t (:inherit default :background "#4f1f1f"))))
+;;**  '(warning ((t (:underline "DarkOrange")))))
 
-; Joost
-(load-theme 'joost t t)
-(custom-theme-set-faces
- 'joost
- '(compilation-error-face ((t (:inherit error))) t)
- '(compilation-warning-face ((t (:inherit warning))) t)
- '(error ((t (:underline "red"))))
- '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
- '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
- '(flyspell-duplicate ((t (:underline "yellow"))) t)
- '(flyspell-incorrect ((t (:underline "red4"))) t)
- '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
- '(font-lock-warning-face ((t (:inherit warning))))
- '(hi-black-b ((t (:weight bold))) t)
- '(hi-blue-b ((((min-colors 88)) (:foreground "blue" :weight bold))) t)
- '(hi-red-b ((((min-colors 88)) (:foreground "red" :weight bold))) t)
- '(hl-line ((t (:inherit highlight :background "#ddeeff"))))
- '(region ((t (:inherit default :background "#ffeedd"))))
- '(warning ((t (:underline "DarkOrange")))))
+;; Joost
+;(load-theme 'joost t t)
+;(custom-theme-set-faces
+; 'joost
+; '(compilation-error-face ((t (:inherit error))) t)
+; '(compilation-warning-face ((t (:inherit warning))) t)
+; '(error ((t (:underline "red"))))
+; '(flymake-errline ((t (:inherit error :box (:line-width 1 :color "red")))))
+; '(flymake-warnline ((t (:inherit warning :box (:line-width 1 :color "DarkOrange")))))
+; '(flyspell-duplicate ((t (:underline "yellow"))) t)
+; '(flyspell-incorrect ((t (:underline "red4"))) t)
+; '(font-lock-comment-face ((t (:inherit default :foreground "#b8c0c8" :background "#3b3b3b"))))
+; '(font-lock-warning-face ((t (:inherit warning))))
+; '(hi-black-b ((t (:weight bold))) t)
+; '(hi-blue-b ((((min-colors 88)) (:foreground "blue" :weight bold))) t)
+; '(hi-red-b ((((min-colors 88)) (:foreground "red" :weight bold))) t)
+; '(hl-line ((t (:inherit highlight :background "#ddeeff"))))
+; '(region ((t (:inherit default :background "#ffeedd"))))
+; '(warning ((t (:underline "DarkOrange")))))
 
 (enable-theme 'zenburn)
 
@@ -345,6 +368,12 @@
 
 (autoload 'markdown-mode "markdown-mode" "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+
+;; ----------------------------------------------------------------------
+;; Redo
+
+(add-to-list 'auto-mode-alist '("\\.do\\'" . sh-mode))
 
 
 ;; ----------------------------------------------------------------------
@@ -394,6 +423,10 @@
 (global-set-key "\C-coa" 'org-agenda)
 (global-set-key "\C-cob" 'org-iswitchb)
 
+;; ----------------------------------------------------------------------
+;; magit
+
+(global-set-key (kbd "C-x g") 'magit-status)
 
 ;; ----------------------------------------------------------------------
 
